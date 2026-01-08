@@ -1,0 +1,35 @@
+# RSS-RAG Configuration
+
+storage:
+  lightrag_dir: "./lightrag_storage"
+  sqlite_db: "./rss_rag.db"
+  feeds_file: "./feeds.txt"
+
+embeddings:
+  provider: "sentence-transformers"
+  model: "all-MiniLM-L6-v2"
+
+llm:
+  entity_extraction:
+    provider: "openai"
+    model: "gpt-4o-mini"
+    temperature: 0.0
+  
+  discovery_agent:
+    provider: "anthropic"
+    model: "claude-sonnet-4"
+    temperature: 0.7
+  
+  summarizer:
+    provider: "openai"
+    model: "gpt-4o-mini"
+    temperature: 0.3
+
+lightrag:
+  chunk_size: 1200
+  chunk_overlap: 100
+  max_graph_depth: 3
+
+feeds:
+  fetch_interval: 3600
+  max_articles_per_fetch: 50

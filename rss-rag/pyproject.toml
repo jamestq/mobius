@@ -1,0 +1,38 @@
+[project]
+name = "rss-rag"
+version = "0.1.0"
+description = "Newsletter aggregation and discovery system using LightRAG"
+authors = [
+    {name = "RSS-RAG Dev"}
+]
+readme = "README.md"
+requires-python = "^3.10"
+dependencies = [
+    "typer (>=0.21.1,<0.22.0)",
+    "feedparser (>=6.0.12,<7.0.0)",
+    "lightrag-hku (>=1.4.9.10,<2.0.0.0)",
+    "sentence-transformers (>=5.2.0,<6.0.0)",
+    "pyyaml (>=6.0.3,<7.0.0)",
+    "pydantic (>=2.12.5,<3.0.0)",
+    "rich (>=13.0.0,<14.0.0)",
+    "langchain (>=1.2.2,<2.0.0)",
+    "langchain-openai (>=1.1.7,<2.0.0)",
+    "langchain-anthropic (>=1.3.1,<2.0.0)",
+    "langchain-core (>=1.2.6,<2.0.0)"
+]
+
+
+[tool.poetry.scripts]
+rss-rag = "rss_rag.cli:main_cli"
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[dependency-groups]
+dev = [
+    "pytest (>=9.0.2,<10.0.0)",
+    "black (>=25.12.0,<26.0.0)",
+    "ruff (>=0.14.10,<0.15.0)",
+    "pytest-cov (>=7.0.0,<8.0.0)"
+]

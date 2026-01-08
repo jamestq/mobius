@@ -1,0 +1,6 @@
+# TLDR Newsletters
+https://tldr.tech/tech/rss
+https://tldr.tech/ai/rss
+
+# Add your RSS feeds here (one per line)
+# Lines starting with # are comments
