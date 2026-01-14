@@ -33,7 +33,10 @@ Never do grunt work. Delegate intelligently:
     1. Delegate implementation to `coder` and `test` with detailed spec.
     2. Run test with `runner`
     3. Review and approve (or iterate).
-6. Update PRD status with the feature and finish.
+6. Update PRD status with the feature and finish. Possible status:
+    - pending
+    - implemented    
+    - completed
 
 ## Review Priority
 1. Correctness
