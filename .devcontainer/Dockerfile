@@ -96,5 +96,9 @@ RUN echo 'export PATH="$HOME/.local/bin:$PATH"' >> $HOME/.zshrc \
   && echo '[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"' >> $HOME/.bashrc \
   && echo '[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"' >> $HOME/.bashrc
 
+
+# Install pre-commit globally
+RUN pip install --user pre-commit
+
 # Set working directory
 WORKDIR /workspace
