@@ -6,7 +6,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "/workspace/.claude/hooks/setup.sh >> \"$CLAUDE_ENV_FILE\""
+            "command": "/workspace/.claude/hooks/setup.sh"
           }
         ]
       }
