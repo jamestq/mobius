@@ -17,7 +17,6 @@ mkdir -p "$TARGET_DIR"
 # Copy the relevant folders to the isolated environment
 cp -r "$SCRIPT_DIR/.claude" "$TARGET_DIR"
 cp -r "$SCRIPT_DIR/.devcontainer" "$TARGET_DIR"
-cp -r "$SCRIPT_DIR/.vscode" "$TARGET_DIR"
 cp -r "$SCRIPT_DIR/.github" "$TARGET_DIR"
 cp "$TARGET_DIR/.devcontainer/.gitignore.project" "$TARGET_DIR/.gitignore"
 
