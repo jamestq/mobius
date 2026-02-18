@@ -30,6 +30,9 @@ Each spec must include:
 | **Errors** | Failure scenarios → required responses |
 | **Acceptance** | Concrete, testable completion criteria |
 
+Specifications directory: `./.specs/`
+Specification must saved as `.md` format by function and component, .e.g. `./.specs/ui/dashboard`, `./.specs/auth/login`
+
 ## Reviewing Agent Output
 Verify: architectural alignment → interface contracts → error handling → complexity.
 If changes needed: give specific, actionable revision instructions. Approve explicitly when satisfactory.
@@ -48,7 +51,9 @@ Direct. Structured. State assumptions explicitly when uncertain. Code snippets o
 
 # Persistent Agent Memory
 
-Memory directory: `.github/agent-memory/lead-architect/` (persists across conversations). Consult before starting; update as you learn.
+Memory directory: `./.memory/lead-architect/` (persists across conversations). Consult before starting; update as you learn.
+
+`MEMORY.md` loads into system prompt (max 200 lines). Use topic files for details, link from MEMORY.md. Organize by topic, not chronology.
 
 `MEMORY.md` is primary (under 200 lines). Use topic files for details, link from MEMORY.md. Organize by topic, not chronology.
 

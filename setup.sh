@@ -19,7 +19,7 @@ cp -r "$SCRIPT_DIR/.claude" "$TARGET_DIR"
 cp -r "$SCRIPT_DIR/.devcontainer" "$TARGET_DIR"
 cp -r "$SCRIPT_DIR/.vscode" "$TARGET_DIR"
 cp -r "$SCRIPT_DIR/.github" "$TARGET_DIR"
-cp "$SCRIPT_DIR/.gitignore" "$TARGET_DIR"
+cp "$TARGET_DIR/.devcontainer/.gitignore.project" "$TARGET_DIR/.gitignore"
 
 # cd into the isolated environment and run the setup script
 cd "$TARGET_DIR"
