@@ -14,7 +14,8 @@
   },
   "runArgs": [
     // "--gpus=all", // This enable gpu usage
-    // These enable firewall settings    
+    // These enable firewall settings
+    "--env-file", ".devcontainer/.env" // Passes env variables from a file to the container
   ], 
   "customizations": {
     "vscode": {
@@ -57,5 +58,6 @@
     "POWERLEVEL9K_DISABLE_GITSTATUS": "true"
   },
   "workspaceMount": "source=${localWorkspaceFolder},target=/workspace,type=bind,consistency=delegated",
-  "workspaceFolder": "/workspace"  
+  "workspaceFolder": "/workspace",
+  "postCreateCommand": "test -f ~/.claude.json && jq '.mcpServers.context7 = {\"command\": \"npx\", \"args\": [\"-y\", \"@upstash/context7-mcp\", env.CONTEXT7]}' ~/.claude.json > /tmp/claude.json && mv /tmp/claude.json ~/.claude.json || echo '{\"mcpServers\":{\"context7\":{\"command\":\"npx\",\"args\":[\"-y\",\"@upstash/context7-mcp\",\"'\"$CONTEXT7\"'\"]}}}'> ~/.claude.json"
 }

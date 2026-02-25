@@ -17,9 +17,18 @@ mkdir -p "$TARGET_DIR"
 # Copy the relevant folders to the isolated environment
 cp -r "$SCRIPT_DIR/.claude" "$TARGET_DIR"
 cp -r "$SCRIPT_DIR/.devcontainer" "$TARGET_DIR"
+if [ -z "$TARGET_DIR/.devcontainer/.env" ]; then
+    mv "$TARGET_DIR/.devcontainer/.env.sample" "$TARGET_DIR/.devcontainer/.env"
+fi
 cp -r "$SCRIPT_DIR/.github" "$TARGET_DIR"
+
 cp "$TARGET_DIR/.devcontainer/.gitignore.project" "$TARGET_DIR/.gitignore"
 
 # cd into the isolated environment and run the setup script
 cd "$TARGET_DIR"
 devcontainer up --workspace-folder .
+
+# if no git repository
+if [ ! -d ".git" ]; then
+    git init
+fi
