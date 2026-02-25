@@ -15,14 +15,32 @@ TARGET_DIR="$1"
 mkdir -p "$TARGET_DIR"
 
 # Copy the relevant folders to the isolated environment
-cp -r "$SCRIPT_DIR/.claude" "$TARGET_DIR"
+# If CLAUDE.md already exists in the target, append rather than override
+if [ -f "$TARGET_DIR/.claude/CLAUDE.md" ]; then
+    echo >> "$TARGET_DIR/.claude/CLAUDE.md"
+    grep -Fxvf "$TARGET_DIR/.claude/CLAUDE.md" "$SCRIPT_DIR/.claude/CLAUDE.md" >> "$TARGET_DIR/.claude/CLAUDE.md"
+    # Copy everything else from .claude except CLAUDE.md
+    find "$SCRIPT_DIR/.claude" -mindepth 1 -not -name "CLAUDE.md" -exec cp -r {} "$TARGET_DIR/.claude/" \;
+else
+    cp -r "$SCRIPT_DIR/.claude" "$TARGET_DIR"
+fi
 cp -r "$SCRIPT_DIR/.devcontainer" "$TARGET_DIR"
-if [ -z "$TARGET_DIR/.devcontainer/.env" ]; then
+if [ ! -f "$TARGET_DIR/.devcontainer/.env" ]; then
     mv "$TARGET_DIR/.devcontainer/.env.sample" "$TARGET_DIR/.devcontainer/.env"
 fi
 cp -r "$SCRIPT_DIR/.github" "$TARGET_DIR"
 
-cp "$TARGET_DIR/.devcontainer/.gitignore.project" "$TARGET_DIR/.gitignore"
+# Update devcontainer name to match the target directory
+DIR_NAME=$(basename "$TARGET_DIR")
+sed "s/\"name\": \"Development Sandbox\"/\"name\": \"$DIR_NAME\"/" "$TARGET_DIR/.devcontainer/devcontainer.json" > "$TARGET_DIR/.devcontainer/devcontainer.json.tmp" && mv "$TARGET_DIR/.devcontainer/devcontainer.json.tmp" "$TARGET_DIR/.devcontainer/devcontainer.json"
+
+# If .gitignore already exists, only append lines not already present
+if [ -f "$TARGET_DIR/.gitignore" ]; then
+    echo >> "$TARGET_DIR/.gitignore"
+    grep -Fxvf "$TARGET_DIR/.gitignore" "$SCRIPT_DIR/.devcontainer/.gitignore.project" >> "$TARGET_DIR/.gitignore"
+else
+    cp "$SCRIPT_DIR/.devcontainer/.gitignore.project" "$TARGET_DIR/.gitignore"
+fi
 
 # cd into the isolated environment and run the setup script
 cd "$TARGET_DIR"
