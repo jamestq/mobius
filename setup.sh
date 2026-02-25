@@ -17,8 +17,12 @@ mkdir -p "$TARGET_DIR"
 # Copy the relevant folders to the isolated environment
 # If CLAUDE.md already exists in the target, append rather than override
 if [ -f "$TARGET_DIR/.claude/CLAUDE.md" ]; then
-    echo >> "$TARGET_DIR/.claude/CLAUDE.md"
-    grep -Fxvf "$TARGET_DIR/.claude/CLAUDE.md" "$SCRIPT_DIR/.claude/CLAUDE.md" >> "$TARGET_DIR/.claude/CLAUDE.md"
+    # Find lines in source not present in target, append only new lines
+    NEW_LINES=$(grep -Fxvf "$TARGET_DIR/.claude/CLAUDE.md" "$SCRIPT_DIR/.claude/CLAUDE.md" || true)
+    if [ -n "$NEW_LINES" ]; then
+        echo >> "$TARGET_DIR/.claude/CLAUDE.md"
+        echo "$NEW_LINES" >> "$TARGET_DIR/.claude/CLAUDE.md"
+    fi
     # Copy everything else from .claude except CLAUDE.md
     find "$SCRIPT_DIR/.claude" -mindepth 1 -not -name "CLAUDE.md" -exec cp -r {} "$TARGET_DIR/.claude/" \;
 else
@@ -36,8 +40,12 @@ sed "s/\"name\": \"Development Sandbox\"/\"name\": \"$DIR_NAME\"/" "$TARGET_DIR/
 
 # If .gitignore already exists, only append lines not already present
 if [ -f "$TARGET_DIR/.gitignore" ]; then
-    echo >> "$TARGET_DIR/.gitignore"
-    grep -Fxvf "$TARGET_DIR/.gitignore" "$SCRIPT_DIR/.devcontainer/.gitignore.project" >> "$TARGET_DIR/.gitignore"
+    # Find lines in source not present in target, append only new lines
+    NEW_LINES=$(grep -Fxvf "$TARGET_DIR/.gitignore" "$SCRIPT_DIR/.devcontainer/.gitignore.project" || true)
+    if [ -n "$NEW_LINES" ]; then
+        echo >> "$TARGET_DIR/.gitignore"
+        echo "$NEW_LINES" >> "$TARGET_DIR/.gitignore"
+    fi
 else
     cp "$SCRIPT_DIR/.devcontainer/.gitignore.project" "$TARGET_DIR/.gitignore"
 fi
