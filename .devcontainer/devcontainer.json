@@ -1,12 +1,9 @@
 {
   "name": "Development Sandbox",
   "build": {
-    "dockerfile": "Dockerfile",    
-    "args": { // passes ENV variables to the Docker file
-      "TZ": "${localEnv:TZ:Australia/Sydney}",
-      "CLAUDE_CODE_VERSION": "latest",
-      "GIT_DELTA_VERSION": "0.18.2",
-      "ZSH_IN_DOCKER_VERSION": "1.2.0"
+    "dockerfile": "Dockerfile",
+    "args": {
+      "BASE_IMAGE": "devcontainer-base:latest"
     }
   },
   "features":{
@@ -16,7 +13,7 @@
     // "--gpus=all", // This enable gpu usage
     // These enable firewall settings
     "--env-file", ".devcontainer/.env" // Passes env variables from a file to the container
-  ], 
+  ],
   "customizations": {
     "vscode": {
       "extensions": [ // extensions from VSCode
@@ -24,7 +21,7 @@
         // "esbenp.prettier-vscode",
         "ms-python.black-formatter",
         "eamodio.gitlens",
-        "ms-python.python",        
+        "ms-python.python",
         "github.github-vscode-theme"
       ],
       "settings": {
@@ -51,11 +48,13 @@
   "remoteUser": "dev",
   "mounts": [
     "source=claude-code-bashhistory-${devcontainerId},target=/commandhistory,type=volume",
-    "source=dev-config-${devcontainerId},target=/home/dev,type=volume",           
-    "source=/var/run/docker.sock,target=/var/run/docker.sock,type=bind" 
+    "source=dev-config-${devcontainerId},target=/home/dev,type=volume",
+    "source=/var/run/docker.sock,target=/var/run/docker.sock,type=bind",
+    "source=poetry-cache,target=/home/dev/.cache/pypoetry,type=volume"
   ],
   "containerEnv": {
-    "POWERLEVEL9K_DISABLE_GITSTATUS": "true"
+    "POWERLEVEL9K_DISABLE_GITSTATUS": "true",
+    "POETRY_VIRTUALENVS_IN_PROJECT": "true"
   },
   "workspaceMount": "source=${localWorkspaceFolder},target=/workspace,type=bind,consistency=delegated",
   "workspaceFolder": "/workspace",

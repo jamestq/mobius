@@ -4,15 +4,39 @@
 
 SCRIPT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
 
+# Check environment variables
+if [ -z "$GIT_DELTA_VERSION" ]; then
+    GIT_DELTA_VERSION="0.18.2"
+fi
+
+ZSH_IN_DOCKER_VERSION="${ZSH_IN_DOCKER_VERSION:-1.2.0}"
+BASE_IMAGE="${BASE_IMAGE:-devcontainer-base:latest}"
+DEVCONTAINER=true
+
 if [ -z "$1" ]; then
     echo "Usage: $0 <target_directory>"
     exit 1
-    fi
+fi
 
 TARGET_DIR="$1"
 
 # Create the target directory if it doesn't exist
 mkdir -p "$TARGET_DIR"
+
+# Build the base image if it doesn't already exist (or if --rebuild is passed)
+if [[ "$2" == "--rebuild" ]] || ! docker image inspect "$BASE_IMAGE" &>/dev/null; then
+    echo "Building base image: $BASE_IMAGE ..."
+    docker build \
+        -f "$SCRIPT_DIR/.devcontainer/Dockerfile.base" \
+        --build-arg TZ="${TZ:-Australia/Sydney}" \
+        --build-arg GIT_DELTA_VERSION="$GIT_DELTA_VERSION" \
+        --build-arg ZSH_IN_DOCKER_VERSION="$ZSH_IN_DOCKER_VERSION" \
+        -t "$BASE_IMAGE" \
+        "$SCRIPT_DIR/.devcontainer"
+    echo "Base image built: $BASE_IMAGE"
+else
+    echo "Reusing existing base image: $BASE_IMAGE"
+fi
 
 # Copy the relevant folders to the isolated environment
 # If CLAUDE.md already exists in the target, append rather than override
