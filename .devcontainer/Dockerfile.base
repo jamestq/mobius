@@ -3,9 +3,19 @@ FROM python:3.12-bookworm
 ARG TZ
 ENV TZ="$TZ"
 
+# Add GitHub CLI source
+RUN (type -p wget >/dev/null || (apt update && apt install wget -y)) \
+	&& mkdir -p -m 755 /etc/apt/keyrings \
+	&& out=$(mktemp) && wget -nv -O$out https://cli.github.com/packages/githubcli-archive-keyring.gpg \
+	&& cat $out | tee /etc/apt/keyrings/githubcli-archive-keyring.gpg > /dev/null \
+	&& chmod go+r /etc/apt/keyrings/githubcli-archive-keyring.gpg \
+	&& mkdir -p -m 755 /etc/apt/sources.list.d \
+	&& echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | tee /etc/apt/sources.list.d/github-cli.list > /dev/null
+
 # Install basic development tools and Node.js
 RUN apt-get update && apt-get install -y --no-install-recommends \
   git \
+  gh \ 
   unzip \
   less \
   procps \
@@ -80,7 +90,7 @@ RUN curl -sSL https://install.python-poetry.org | python3 \
 RUN curl -fsSL https://claude.ai/install.sh | bash
 
 # Default powerline10k theme
-ARG ZSH_IN_DOCKER_VERSION="$ZSH_IN_DOCKER_VERSION"
+ARG ZSH_IN_DOCKER_VERSION=1.2.0
 RUN sh -c "$(curl -fsSL https://github.com/deluan/zsh-in-docker/releases/download/v${ZSH_IN_DOCKER_VERSION}/zsh-in-docker.sh)" -- \
   -p git \
   -p fzf \

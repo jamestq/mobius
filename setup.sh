@@ -5,10 +5,8 @@
 SCRIPT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
 
 # Check environment variables
-if [ -z "$GIT_DELTA_VERSION" ]; then
-    GIT_DELTA_VERSION="0.18.2"
-fi
-
+TZ="${TZ:-Australia/Sydney}"
+GIT_DELTA_VERSION="${GIT_DELTA_VERSION:-0.18.2}"
 ZSH_IN_DOCKER_VERSION="${ZSH_IN_DOCKER_VERSION:-1.2.0}"
 BASE_IMAGE="${BASE_IMAGE:-devcontainer-base:latest}"
 DEVCONTAINER=true
@@ -28,7 +26,7 @@ if [[ "$2" == "--rebuild" ]] || ! docker image inspect "$BASE_IMAGE" &>/dev/null
     echo "Building base image: $BASE_IMAGE ..."
     docker build \
         -f "$SCRIPT_DIR/.devcontainer/Dockerfile.base" \
-        --build-arg TZ="${TZ:-Australia/Sydney}" \
+        --build-arg TZ="$TZ" \
         --build-arg GIT_DELTA_VERSION="$GIT_DELTA_VERSION" \
         --build-arg ZSH_IN_DOCKER_VERSION="$ZSH_IN_DOCKER_VERSION" \
         -t "$BASE_IMAGE" \
