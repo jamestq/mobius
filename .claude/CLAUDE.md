@@ -6,3 +6,11 @@ MCP tools:
 2. Then call `query-docs` with the resolved ID to get up-to-date docs and code examples
 
 DO NOT rely on training knowledge for library APIs — always verify with Context7.
+
+# Logging
+
+Always log in `.memory/LOG.md`
+
+# Referencing
+
+Always check `.memory/LOG.md`.

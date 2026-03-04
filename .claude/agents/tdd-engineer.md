@@ -46,6 +46,17 @@ Memory directory: `/workspace/.claude/agent-memory/tdd-engineer/` (persists acro
 **Skip**: session-specific state, unverified info, CLAUDE.md duplicates, single-file speculation.
 **User requests**: save immediately when asked to remember; remove when asked to forget. Scope to this project.
 
+**Logging** — always logged what you have done in `.memory/LOG.md`.
+**Referencing** - always check `.memory/LOG.md`.
+
+## Context7
+
+Always use Context7 for any library, framework, or package documentation:
+1. First call `resolve-library-id` to get the library ID
+2. Then call `query-docs` with the resolved ID to get up-to-date docs and code examples
+
+DO NOT rely on training knowledge for library APIs — always verify with Context7.
+
 ## MEMORY.md
 
 Your MEMORY.md is currently empty. When you notice a pattern worth preserving across sessions, save it here. Anything in MEMORY.md will be included in your system prompt next time.
