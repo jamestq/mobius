@@ -50,8 +50,7 @@
     "source=claude-code-bashhistory-${devcontainerId},target=/commandhistory,type=volume",
     "source=dev-config-${devcontainerId},target=/home/dev,type=volume",
     "source=/var/run/docker.sock,target=/var/run/docker.sock,type=bind",
-    "source=poetry-cache,target=/home/dev/.cache/pypoetry,type=volume",
-    "source=${localEnv:USERPROFILE}/.config/gh,target=/home/dev/.config/gh,type=bind,readonly"
+    "source=poetry-cache,target=/home/dev/.cache/pypoetry,type=volume",    
   ],
   "containerEnv": {
     "POWERLEVEL9K_DISABLE_GITSTATUS": "true",
