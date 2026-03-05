@@ -22,10 +22,3 @@ Memory directory: `./.memory/` (persists across conversations, local to project 
 ## MEMORY.md
 
 Your MEMORY.md is currently empty. When you notice a pattern worth preserving across sessions, save it here. Anything in MEMORY.md will be included in your system prompt next time.
-# Tools                                                                                      
-Always use the Context7 for any library, framework, or package:
-MCP tools:                                                                                 
-# Logging
-Always log in `.memory/LOG.md`
-# Referencing
-Always check `.memory/LOG.md`.
