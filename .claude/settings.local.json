@@ -1,4 +1,10 @@
 {
+  "permissions": {
+    "allow": [
+      "mcp__context7__resolve-library-id",
+      "mcp__context7__query-docs"
+    ]
+  },
   "hooks": {
     "PreToolUse": [
       {
@@ -7,6 +13,15 @@
           {
             "type": "command",
             "command": "/workspace/.claude/hooks/setup.sh"
+          }
+        ]
+      },
+      {
+        "matcher": "Read|Edit|Write|Bash|Grep",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/workspace/.claude/hooks/protect-env.sh"
           }
         ]
       }
