@@ -46,7 +46,7 @@ if [ -f "$TARGET_DIR/.claude/CLAUDE.md" ]; then
         echo "$NEW_LINES" >> "$TARGET_DIR/.claude/CLAUDE.md"
     fi
     # Copy everything else from .claude except CLAUDE.md
-    find "$SCRIPT_DIR/.claude" -mindepth 1 -not -name "CLAUDE.md" -exec cp -r {} "$TARGET_DIR/.claude/" \;
+    find "$SCRIPT_DIR/.claude" -mindepth 1 -maxdepth 1 -not -name "CLAUDE.md" -exec cp -r {} "$TARGET_DIR/.claude/" \;
 else
     cp -r "$SCRIPT_DIR/.claude" "$TARGET_DIR"
 fi
