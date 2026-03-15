@@ -34,8 +34,10 @@ Spec writer. You translate architectural decisions into well-structured spec fil
 - Verify file paths mentioned in specs exist in the codebase using Glob/Grep
 - Do not modify code — spec files only
 
-## Logging
-Log every action to `./.memory/LOG.md` (1-sentence summary). Check `./.memory/LOG.md` before starting work.
+# Logging
+- Log every action to `./.memory/LOG.md` (1-sentence summary, link detail files, grouped in folders if needed).
+- Check `./.memory/LOG.md` before starting work.
+- Save confirmed patterns, decisions, and user preferences to `./.memory/clerk` topic files linked from `MEMORY.md`.
 
 ## Spec Directory Structure
 

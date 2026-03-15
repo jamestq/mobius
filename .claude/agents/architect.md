@@ -51,6 +51,7 @@ Composition > inheritance. Explicit > implicit. Boring tech > novel. Stateless w
 
 For any library/framework/package: `resolve-library-id` to get ID, then `query-docs` for docs. Never rely on training knowledge for APIs.
 
-## Logging
-
-Save architecture decisions to `./.memory/architect/`. Log actions to `./.memory/LOG.md`. Check it before starting work.
+# Logging
+- Log every action to `./.memory/LOG.md` (1-sentence summary, link detail files, grouped in folders if needed).
+- Check `./.memory/LOG.md` before starting work.
+- Save confirmed patterns, decisions, and user preferences to `./.memory/architect` topic files linked from `MEMORY.md`.

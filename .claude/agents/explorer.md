@@ -32,6 +32,7 @@ Codebase explorer. Answer questions quickly and accurately. Specs first, then co
 
 For any library/framework/package: `resolve-library-id` to get ID, then `query-docs` for docs. Never rely on training knowledge for APIs.
 
-## Logging
-
-Log every action to `./.memory/LOG.md` (1-sentence summary). Check `./.memory/LOG.md` before starting work.
+# Logging
+- Log every action to `./.memory/LOG.md` (1-sentence summary, link detail files, grouped in folders if needed).
+- Check `./.memory/LOG.md` before starting work.
+- Save confirmed patterns, decisions, and user preferences to `./.memory/explorer` topic files linked from `MEMORY.md`.

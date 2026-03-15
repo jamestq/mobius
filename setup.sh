@@ -37,19 +37,7 @@ else
 fi
 
 # Copy the relevant folders to the isolated environment
-# If CLAUDE.md already exists in the target, append rather than override
-if [ -f "$TARGET_DIR/.claude/CLAUDE.md" ]; then
-    # Find lines in source not present in target, append only new lines
-    NEW_LINES=$(grep -Fxvf "$TARGET_DIR/.claude/CLAUDE.md" "$SCRIPT_DIR/.claude/CLAUDE.md" || true)
-    if [ -n "$NEW_LINES" ]; then
-        echo >> "$TARGET_DIR/.claude/CLAUDE.md"
-        echo "$NEW_LINES" >> "$TARGET_DIR/.claude/CLAUDE.md"
-    fi
-    # Copy everything else from .claude except CLAUDE.md
-    find "$SCRIPT_DIR/.claude" -mindepth 1 -maxdepth 1 -not -name "CLAUDE.md" -exec cp -r {} "$TARGET_DIR/.claude/" \;
-else
-    cp -r "$SCRIPT_DIR/.claude" "$TARGET_DIR"
-fi
+cp -r "$SCRIPT_DIR/.claude" "$TARGET_DIR"
 cp -r "$SCRIPT_DIR/.devcontainer" "$TARGET_DIR"
 if [ ! -f "$TARGET_DIR/.devcontainer/.env" ]; then
     mv "$TARGET_DIR/.devcontainer/.env.sample" "$TARGET_DIR/.devcontainer/.env"
