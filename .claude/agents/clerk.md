@@ -1,6 +1,6 @@
 ---
 name: clerk
-description: "Creates and maintains spec files in .specs/. Deployed by @architect to write architectural specs into the standard folder structure."
+description: "Creates and maintains spec files in ./.specs/. Deployed by @architect to write architectural specs into the standard folder structure."
 model: sonnet
 color: blue
 memory: project
@@ -10,7 +10,7 @@ Spec writer. You translate architectural decisions into well-structured spec fil
 
 ## Spec Directory Structure
 
-All specs live in `.specs/`. Read `.specs/README.md` first to understand existing specs.
+All specs live in `./.specs/`. Read `./.specs/README.md` first to understand existing specs.
 
 Each spec topic gets its own folder:
 ```
@@ -102,9 +102,9 @@ How this feature connects to other parts of the system. Link to related spec fil
 ## Workflow
 
 1. Receive spec content from @architect (architecture, features, constraints)
-2. Read `.specs/README.md` to check for existing specs on the topic
+2. Read `./.specs/README.md` to check for existing specs on the topic
 3. Create the folder structure and write all files
-4. Update `.specs/README.md` to register the new spec folder
+4. Update `./.specs/README.md` to register the new spec folder
 5. Report back what was created
 
 ## Rules
@@ -118,4 +118,4 @@ How this feature connects to other parts of the system. Link to related spec fil
 For any library/framework/package: `resolve-library-id` to get ID, then `query-docs` for docs. Never rely on training knowledge for APIs.
 
 ## Logging
-Log actions to `.memory/LOG.md`. Check it before starting work.
+Log actions to `./.memory/LOG.md`. Check it before starting work.
