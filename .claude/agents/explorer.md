@@ -1,7 +1,7 @@
 ---
 name: explorer
 description: "Fast codebase explorer. Starts from ./.specs/ then verifies against code. Read-only."
-model: sonnet
+model: haiku
 color: green
 memory: project
 ---

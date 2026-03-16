@@ -58,6 +58,6 @@
   },
   "workspaceMount": "source=${localWorkspaceFolder},target=/workspace,type=bind,consistency=delegated",
   "workspaceFolder": "/workspace",
-  "postCreateCommand": "sudo chown -R dev:dev /home/dev/.claude 2>/dev/null; test -f ~/.claude.json && jq '.mcpServers.context7 = {\"type\": \"stdio\", \"command\": \"npx\", \"args\": [\"-y\", \"@upstash/context7-mcp\", \"--api-key\", env.CONTEXT7]}' ~/.claude.json > /tmp/claude.json && mv /tmp/claude.json ~/.claude.json",
+  "postCreateCommand": "sudo chown -R dev:dev /home/dev/.cache/pypoetry /home/dev/.claude 2>/dev/null; test -f ~/.claude.json && jq '.mcpServers.context7 = {\"type\": \"stdio\", \"command\": \"npx\", \"args\": [\"-y\", \"@upstash/context7-mcp\", \"--api-key\", env.CONTEXT7]}' ~/.claude.json > /tmp/claude.json && mv /tmp/claude.json ~/.claude.json",
   "updateRemoteUserUID": true
 }
