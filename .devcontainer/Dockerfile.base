@@ -112,6 +112,10 @@ RUN echo 'export PATH="$HOME/.local/bin:$PATH"' >> $HOME/.zshrc \
   && echo '[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"' >> $HOME/.bashrc \
   && echo '[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"' >> $HOME/.bashrc
 
+# Add a Claude alias that appends the repo-level SYSTEM prompt automatically
+RUN echo "alias claudep='claude --append-system-prompt .claude/SYSTEM.md'" >> $HOME/.zshrc \
+  && echo "alias claudep='claude --append-system-prompt .claude/SYSTEM.md'" >> $HOME/.bashrc
+
 # Install pre-commit globally
 RUN pip install --user pre-commit
 
