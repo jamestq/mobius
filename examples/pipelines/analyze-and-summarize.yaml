@@ -1,8 +1,0 @@
-name: analyze-and-summarize
-description: Analyze code then summarize findings
-agents_dir: ../agents
-steps:
-  - agent: analyzer
-    guardrails:
-      max_tokens: 30000
-  - agent: summarizer

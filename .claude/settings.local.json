@@ -8,7 +8,7 @@
   "hooks": {
     "PreToolUse": [
       {
-        "matcher": "Bash",
+        "matcher": "Read|Edit|Write|Bash|Grep|Glob|Agent",
         "hooks": [
           {
             "type": "command",
@@ -17,11 +17,24 @@
         ]
       },
       {
-        "matcher": "Read|Edit|Write|Bash|Grep",
+        "matcher": "Read|Edit|Write|Bash|Grep|Glob",
         "hooks": [
           {
             "type": "command",
-            "command": "/workspace/.claude/hooks/protect-env.sh"
+            "command": "/workspace/.claude/hooks/protector/protect-env.sh"
+          }
+        ]
+      },
+      {
+        "matcher": "Agent|Grep|Glob",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/workspace/.claude/hooks/enforcer/enforce-explorer.sh"
+          },
+          {
+            "type": "command",
+            "command": "/workspace/.claude/hooks/enforcer/enforce-architect.sh"
           }
         ]
       }

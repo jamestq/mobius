@@ -47,17 +47,22 @@
   },
   "remoteUser": "dev",
   "mounts": [
-    "source=claude-code-bashhistory-${devcontainerId},target=/commandhistory,type=volume",
-    "source=dev-config-${devcontainerId},target=/home/dev,type=volume",
+    "source=claude-code-bashhistory-${localWorkspaceFolderBasename},target=/commandhistory,type=volume",
+    "source=dev-config-${localWorkspaceFolderBasename},target=/home/dev,type=volume",
     "source=/var/run/docker.sock,target=/var/run/docker.sock,type=bind",
-    "source=poetry-cache,target=/home/dev/.cache/pypoetry,type=volume",    
+    "source=poetry-cache,target=/home/dev/.cache/pypoetry,type=volume",
+    "source=npm-cache,target=/home/dev/.npm,type=volume",
+    "source=pip-cache,target=/home/dev/.cache/pip,type=volume",
+    "source=claude-config,target=/home/dev/.claude,type=volume",
   ],
   "containerEnv": {
     "POWERLEVEL9K_DISABLE_GITSTATUS": "true",
-    "POETRY_VIRTUALENVS_IN_PROJECT": "true"
+    "POETRY_VIRTUALENVS_IN_PROJECT": "true",
+    "BASH_ENV": "/workspace/.claude/project-env.sh"
   },
+  "forwardPorts": [8000, 8001, 3000, 3001, ],
   "workspaceMount": "source=${localWorkspaceFolder},target=/workspace,type=bind,consistency=delegated",
   "workspaceFolder": "/workspace",
-  "postCreateCommand": "sudo chown -R dev:dev /home/dev/.cache/pypoetry /home/dev/.claude 2>/dev/null; test -f ~/.claude.json && jq '.mcpServers.context7 = {\"type\": \"stdio\", \"command\": \"npx\", \"args\": [\"-y\", \"@upstash/context7-mcp\", \"--api-key\", env.CONTEXT7]}' ~/.claude.json > /tmp/claude.json && mv /tmp/claude.json ~/.claude.json",
+  "postCreateCommand": "bash .devcontainer/entry.sh",
   "updateRemoteUserUID": true
 }

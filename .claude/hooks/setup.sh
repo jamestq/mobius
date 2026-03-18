@@ -1,92 +1,120 @@
 #!/bin/bash
-# Detect project environment and testing setup.
-# Writes export statements to .claude/project-env.sh so they are
-# picked up by every Bash tool call via ~/.bashrc sourcing.
+# Environment setup hook — runs once per session.
+# Reads .claude/env.json for explicit config, falls back to auto-detection.
+# Writes exports to .claude/project-env.sh, sourced by ~/.bashrc on every Bash call.
 
+INPUT=$(cat)
+SESSION_ID=$(echo "$INPUT" | jq -r '.session_id // empty')
+FLAG="/tmp/claude-env-setup-${SESSION_ID}"
 ENV_FILE="/workspace/.claude/project-env.sh"
+CONFIG_FILE="/workspace/.claude/env.json"
 
-# ── Detect environment ──────────────────────────────────────────
+# Run once per session
+[ -f "$FLAG" ] && exit 0
+[ -n "$SESSION_ID" ] && touch "$FLAG"
 
-# Python virtual environment
+# ── Read explicit config ─────────────────────────────────────────
+
+PYTHON_MGR=""
+NODE_MGR=""
+
+if [ -f "$CONFIG_FILE" ]; then
+  PYTHON_MGR=$(jq -r '.python // empty' "$CONFIG_FILE")
+  NODE_MGR=$(jq -r '.node // empty' "$CONFIG_FILE")
+fi
+
+# ── Python ───────────────────────────────────────────────────────
+
 VENV_PATH=""
 CONDA_ENV=""
-if [ -f .venv/bin/activate ]; then
-    VENV_PATH=.venv
-elif [ -f venv/bin/activate ]; then
-    VENV_PATH=venv
-elif [ -f env/bin/activate ]; then
-    VENV_PATH=env
-elif [ -f environment.yml ]; then
-    CONDA_ENV=$(grep 'name:' environment.yml | cut -d: -f2 | tr -d ' ')
-fi
-
-# Node.js package manager
-PKG_MANAGER=""
-if [ -f package.json ]; then
-    if command -v pnpm >/dev/null 2>&1 && [ -f pnpm-lock.yaml ]; then
-        PKG_MANAGER=pnpm
-    elif command -v yarn >/dev/null 2>&1 && [ -f yarn.lock ]; then
-        PKG_MANAGER=yarn
-    else
-        PKG_MANAGER=npm
-    fi
-fi
-
-# Test framework detection
-TEST_FRAMEWORK=""
-TEST_CMD=""
-if [ -f pytest.ini ] || grep -q pytest pyproject.toml 2>/dev/null; then
-    TEST_FRAMEWORK=pytest
-    TEST_CMD=pytest
-elif [ -f package.json ] && grep -q '"test"' package.json; then
-    TEST_FRAMEWORK=jest
-    TEST_CMD="${PKG_MANAGER:-npm} test"
-elif [ -f Cargo.toml ]; then
-    TEST_FRAMEWORK=cargo
-    TEST_CMD="cargo test"
-elif [ -f go.mod ]; then
-    TEST_FRAMEWORK=go
-    TEST_CMD="go test ./..."
-elif [ -f Gemfile ]; then
-    TEST_FRAMEWORK=rspec
-    TEST_CMD="bundle exec rspec"
-elif [ -f pom.xml ]; then
-    TEST_FRAMEWORK=maven
-    TEST_CMD="mvn test"
-elif [ -f build.gradle ] || [ -f build.gradle.kts ]; then
-    TEST_FRAMEWORK=gradle
-    TEST_CMD="gradle test"
-fi
-
-# Activate environment command
 ACTIVATE_ENV=""
-if [ -n "$VENV_PATH" ]; then
-    ACTIVATE_ENV="source $VENV_PATH/bin/activate"
-elif [ -n "$CONDA_ENV" ]; then
-    ACTIVATE_ENV="conda activate $CONDA_ENV"
+TEST_CMD=""
+
+resolve_python() {
+  local mgr="$1"
+  case "$mgr" in
+    poetry)
+      VENV_PATH=$(poetry env info --path 2>/dev/null || echo ".venv")
+      ACTIVATE_ENV="poetry run"
+      TEST_CMD="poetry run pytest"
+      ;;
+    uv)
+      VENV_PATH=".venv"
+      ACTIVATE_ENV="uv run"
+      TEST_CMD="uv run pytest"
+      ;;
+    pip)
+      for d in .venv venv env; do
+        [ -f "$d/bin/activate" ] && VENV_PATH="$d" && break
+      done
+      ACTIVATE_ENV="source ${VENV_PATH:-venv}/bin/activate"
+      TEST_CMD="pytest"
+      ;;
+    conda)
+      CONDA_ENV=$(grep 'name:' environment.yml 2>/dev/null | cut -d: -f2 | tr -d ' ')
+      ACTIVATE_ENV="conda activate ${CONDA_ENV}"
+      TEST_CMD="pytest"
+      ;;
+    pipenv)
+      ACTIVATE_ENV="pipenv run"
+      TEST_CMD="pipenv run pytest"
+      ;;
+  esac
+}
+
+if [ -n "$PYTHON_MGR" ]; then
+  resolve_python "$PYTHON_MGR"
+else
+  # Auto-detect
+  if [ -f pyproject.toml ] && command -v poetry >/dev/null 2>&1; then
+    resolve_python poetry
+  elif [ -f pyproject.toml ] && command -v uv >/dev/null 2>&1; then
+    resolve_python uv
+  elif [ -f Pipfile ] && command -v pipenv >/dev/null 2>&1; then
+    resolve_python pipenv
+  elif [ -f environment.yml ]; then
+    resolve_python conda
+  else
+    resolve_python pip
+  fi
 fi
 
-# ── Build env file content ──────────────────────────────────────
+# ── Node ─────────────────────────────────────────────────────────
+
+PKG_MANAGER=""
+
+resolve_node() {
+  local mgr="$1"
+  case "$mgr" in
+    pnpm|yarn|npm) PKG_MANAGER="$mgr" ;;
+  esac
+}
+
+if [ -n "$NODE_MGR" ]; then
+  resolve_node "$NODE_MGR"
+elif [ -f package.json ]; then
+  if command -v pnpm >/dev/null 2>&1 && [ -f pnpm-lock.yaml ]; then
+    resolve_node pnpm
+  elif command -v yarn >/dev/null 2>&1 && [ -f yarn.lock ]; then
+    resolve_node yarn
+  else
+    resolve_node npm
+  fi
+fi
+
+# ── Write project-env.sh (idempotent) ───────────────────────────
 
 NEW_CONTENT=""
-[ -n "$VENV_PATH" ]      && NEW_CONTENT="${NEW_CONTENT}export VENV_PATH=\"$VENV_PATH\"
-"
-[ -n "$CONDA_ENV" ]      && NEW_CONTENT="${NEW_CONTENT}export CONDA_ENV=\"$CONDA_ENV\"
-"
-[ -n "$PKG_MANAGER" ]    && NEW_CONTENT="${NEW_CONTENT}export PKG_MANAGER=\"$PKG_MANAGER\"
-"
-[ -n "$TEST_FRAMEWORK" ] && NEW_CONTENT="${NEW_CONTENT}export TEST_FRAMEWORK=\"$TEST_FRAMEWORK\"
-"
-[ -n "$TEST_CMD" ]       && NEW_CONTENT="${NEW_CONTENT}export TEST_CMD=\"$TEST_CMD\"
-"
-[ -n "$ACTIVATE_ENV" ]   && NEW_CONTENT="${NEW_CONTENT}export ACTIVATE_ENV=\"$ACTIVATE_ENV\"
-"
-
-# ── Write only if changed (idempotent) ──────────────────────────
+[ -n "$VENV_PATH" ]     && NEW_CONTENT+="export VENV_PATH=\"$VENV_PATH\"\n"
+[ -n "$CONDA_ENV" ]     && NEW_CONTENT+="export CONDA_ENV=\"$CONDA_ENV\"\n"
+[ -n "$PKG_MANAGER" ]   && NEW_CONTENT+="export PKG_MANAGER=\"$PKG_MANAGER\"\n"
+[ -n "$TEST_CMD" ]      && NEW_CONTENT+="export TEST_CMD=\"$TEST_CMD\"\n"
+[ -n "$ACTIVATE_ENV" ]  && NEW_CONTENT+="export ACTIVATE_ENV=\"$ACTIVATE_ENV\"\n"
 
 OLD_CONTENT=""
 [ -f "$ENV_FILE" ] && OLD_CONTENT=$(cat "$ENV_FILE")
 
-if [ "$NEW_CONTENT" != "$OLD_CONTENT" ]; then
-    printf '%s' "$NEW_CONTENT" > "$ENV_FILE"
-fi
+RESOLVED=$(printf '%b' "$NEW_CONTENT")
+[ "$RESOLVED" != "$OLD_CONTENT" ] && printf '%b' "$NEW_CONTENT" > "$ENV_FILE"
+
+exit 0
