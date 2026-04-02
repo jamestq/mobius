@@ -24,19 +24,6 @@
             "command": "/workspace/.claude/hooks/protector/protect-env.sh"
           }
         ]
-      },
-      {
-        "matcher": "Agent|Grep|Glob",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "/workspace/.claude/hooks/enforcer/enforce-explorer.sh"
-          },
-          {
-            "type": "command",
-            "command": "/workspace/.claude/hooks/enforcer/enforce-architect.sh"
-          }
-        ]
       }
     ]
   },

@@ -1,25 +1,15 @@
-FROM python:3.12-bookworm
+FROM python:3.13-bookworm
 
 ARG TZ
 ENV TZ="$TZ"
 
-# Add GitHub CLI source
-RUN (type -p wget >/dev/null || (apt update && apt install wget -y)) \
-	&& mkdir -p -m 755 /etc/apt/keyrings \
-	&& out=$(mktemp) && wget -nv -O$out https://cli.github.com/packages/githubcli-archive-keyring.gpg \
-	&& cat $out | tee /etc/apt/keyrings/githubcli-archive-keyring.gpg > /dev/null \
-	&& chmod go+r /etc/apt/keyrings/githubcli-archive-keyring.gpg \
-	&& mkdir -p -m 755 /etc/apt/sources.list.d \
-	&& echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | tee /etc/apt/sources.list.d/github-cli.list > /dev/null
-
 # Install basic development tools and Node.js
 RUN apt-get update && apt-get install -y --no-install-recommends \
   git \
-  gh \ 
+  gh \
   unzip \
   less \
-  procps \
-  nano \
+  procps \  
   neovim \
   fzf \
   zsh \
@@ -33,6 +23,11 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
   dnsutils \
   aggregate \
   jq \
+  # Neovim/kickstart dependencies
+  ripgrep \
+  fd-find \
+  make \
+  gcc \
   # OpenCV dependencies
   libgl1 \
   libglib2.0-0 \
@@ -40,7 +35,18 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
   libxext6 \
   libxrender1 \
   libgomp1 \
+  # Docker dependencies
+  docker.io \
   && apt-get clean && rm -rf /var/lib/apt/lists/*
+
+# Add GitHub CLI source
+RUN (type -p wget >/dev/null || (apt update && apt install wget -y)) \
+	&& mkdir -p -m 755 /etc/apt/keyrings \
+	&& out=$(mktemp) && wget -nv -O$out https://cli.github.com/packages/githubcli-archive-keyring.gpg \
+	&& cat $out | tee /etc/apt/keyrings/githubcli-archive-keyring.gpg > /dev/null \
+	&& chmod go+r /etc/apt/keyrings/githubcli-archive-keyring.gpg \
+	&& mkdir -p -m 755 /etc/apt/sources.list.d \
+	&& echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | tee /etc/apt/sources.list.d/github-cli.list > /dev/null
 
 # Create dev user with sudo access
 RUN useradd -m -s /bin/zsh -G sudo dev \
@@ -68,8 +74,8 @@ RUN git config --system credential.https://github.com.helper '!/usr/bin/gh auth 
 ENV SHELL=/bin/zsh
 
 # Set the default editor and visual
-ENV EDITOR=nano
-ENV VISUAL=nano
+ENV EDITOR=nvim
+ENV VISUAL=nvim
 
 # Create workspace directory with proper ownership
 RUN mkdir -p /workspace && chown -R dev:dev /workspace
@@ -90,33 +96,35 @@ RUN curl -sSL https://install.python-poetry.org | python3 \
   && $HOME/.local/bin/poetry config cache-dir /home/dev/.cache/pypoetry
 
 # Install Claude Code
-RUN curl -fsSL https://claude.ai/install.sh | bash
+RUN curl -fsSL https://claude.ai/install.sh | bash  
+RUN echo 'source /usr/share/doc/fzf/examples/key-bindings.zsh' >> ~/.zshrc \
+  && echo 'source /usr/share/doc/fzf/examples/completion.zsh' >> ~/.zshrc \
+  && echo 'export PROMPT_COMMAND="history -a" && export HISTFILE=/commandhistory/.bash_history' >> ~/.zshrc  
 
-# Default powerline10k theme
-ARG ZSH_IN_DOCKER_VERSION=1.2.0
-RUN sh -c "$(curl -fsSL https://github.com/deluan/zsh-in-docker/releases/download/v${ZSH_IN_DOCKER_VERSION}/zsh-in-docker.sh)" -- \
-  -p git \
-  -p fzf \
-  -a "source /usr/share/doc/fzf/examples/key-bindings.zsh" \
-  -a "source /usr/share/doc/fzf/examples/completion.zsh" \
-  -a "export PROMPT_COMMAND='history -a' && export HISTFILE=/commandhistory/.bash_history" \
-  -x
+  # Install starship
+RUN curl -sS https://starship.rs/install.sh | sh -s -- -y -b "$HOME/.local/bin" 2>&1
+
+# Install kickstart.nvim
+RUN git clone https://github.com/jamestq/kickstart.nvim.git "${XDG_CONFIG_HOME:-$HOME/.config}"/nvim \
+  && nvim --headless "+Lazy! sync" +qa
 
 # Add poetry, nvm, npm, Claude Code to PATH, and load nvm
 RUN echo 'export PATH="$HOME/.local/bin:$PATH"' >> $HOME/.zshrc \
   && echo 'export NVM_DIR="$HOME/.nvm"' >> $HOME/.zshrc \
   && echo '[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"' >> $HOME/.zshrc \
-  && echo '[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"' >> $HOME/.zshrc \
+  && echo '[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"' >> $HOME/.zshrc \  
   && echo 'export PATH="$HOME/.local/bin:$PATH"' >> $HOME/.bashrc \
   && echo 'export NVM_DIR="$HOME/.nvm"' >> $HOME/.bashrc \
   && echo '[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"' >> $HOME/.bashrc \
-  && echo '[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"' >> $HOME/.bashrc
+  && echo '[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"' >> $HOME/.bashrc \
+  && echo 'eval "$(starship init zsh)"' >> ~/.zshrc
+
 
 # Add a Claude alias that appends the repo-level SYSTEM prompt automatically
 RUN echo "alias claudep='claude --append-system-prompt .claude/SYSTEM.md'" >> $HOME/.zshrc \
   && echo "alias claudep='claude --append-system-prompt .claude/SYSTEM.md'" >> $HOME/.bashrc
 
-# Install pre-commit globally
+  # Install pre-commit globally
 RUN pip install --user pre-commit
 
 # Clean up pip and poetry caches to reduce image size

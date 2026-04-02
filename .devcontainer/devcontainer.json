@@ -10,9 +10,8 @@
     "ghcr.io/devcontainers/features/docker-outside-of-docker:1": {}
   },
   "runArgs": [
-    // "--gpus=all", // This enable gpu usage
-    // These enable firewall settings
-    "--env-file", ".devcontainer/.env" // Passes env variables from a file to the container
+    // "--gpus=all", // This enable gpu usage   
+    "--env-file", ".devcontainer/.env" // Passes as ENV to container
   ],
   "customizations": {
     "vscode": {

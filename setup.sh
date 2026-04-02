@@ -2,6 +2,8 @@
 # This script is a crude setup script for isolated development environments.
 # A more robust solution would be developed soon, but this should work for now.
 
+set -euo pipefail
+
 SCRIPT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
 
 # Check environment variables
@@ -11,18 +13,42 @@ ZSH_IN_DOCKER_VERSION="${ZSH_IN_DOCKER_VERSION:-1.2.0}"
 BASE_IMAGE="${BASE_IMAGE:-devcontainer-base:latest}"
 DEVCONTAINER=true
 
-if [ -z "$1" ]; then
-    echo "Usage: $0 <target_directory>"
+MODE="vscode"
+REBUILD=false
+POSITIONAL=()
+
+for arg in "$@"; do
+    case $arg in
+        --nvim)    MODE="nvim" ;;
+        --rebuild) REBUILD=true ;;
+        *)         POSITIONAL+=("$arg") ;;
+    esac
+done
+
+if [ "${#POSITIONAL[@]}" -eq 0 ]; then
+    echo "Usage: $0 <target_directory> [--nvim] [--rebuild]"
     exit 1
 fi
 
-TARGET_DIR="$1"
+TARGET_DIR="${POSITIONAL[0]}"
 
 # Create the target directory if it doesn't exist
 mkdir -p "$TARGET_DIR"
 
+# Create volumes if don't exist yet
+volumes=(claude-config bash-history poetry-cache pip-cache npm-cache)
+for v in "${volumes[@]}"; do
+  if docker volume inspect "$v" >/dev/null 2>&1; then
+    echo "[exists] $v"
+  else
+    echo "[missing] $v -> creating"
+    docker volume create "$v" >/dev/null
+    echo "[created] $v"
+  fi
+done
+
 # Build the base image if it doesn't already exist (or if --rebuild is passed)
-if [[ "$2" == "--rebuild" ]] || ! docker image inspect "$BASE_IMAGE" &>/dev/null; then
+if [[ "$REBUILD" == true ]] || ! docker image inspect "$BASE_IMAGE" &>/dev/null; then
     echo "Building base image: $BASE_IMAGE ..."
     docker build \
         -f "$SCRIPT_DIR/.devcontainer/Dockerfile.base" \
@@ -62,9 +88,15 @@ fi
 
 # cd into the isolated environment and run the setup script
 cd "$TARGET_DIR"
-devcontainer up --workspace-folder .
 
-# if no git repository
 if [ ! -d ".git" ]; then
     git init
+fi
+
+if [[ "$MODE" == "nvim" ]]; then
+    echo "Starting Neovim CLI environment via Docker Compose..."
+    echo "Run 'bash .devcontainer/entry.sh' once inside the container to complete setup."
+    docker compose -f .devcontainer/docker-compose.nvim.yml -p "$DIR_NAME" run --rm dev zsh
+else
+    devcontainer up --workspace-folder .
 fi
